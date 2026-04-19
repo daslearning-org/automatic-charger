@@ -37,7 +37,7 @@ version.filename = %(source.dir)s/main.py
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3, kivy==2.3.1, kivymd==1.2.0, pyjnius, android, docutils, filetype, pillow, plyer==2.1.0, Pygments, requests
+requirements = python3, kivy==2.3.1, kivymd==1.2.0, pyjnius, android, docutils, filetype, pillow, Pygments, requests
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -51,7 +51,7 @@ icon.filename = %(source.dir)s/data/images/favicont512.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse, landscape-reverse, or all
-orientation = portrait
+orientation = all
 
 # (list) List of services to declare
 # This is currently only relevant to Android services.
@@ -93,8 +93,8 @@ fullscreen = 0
 #android.presplash_lottie = "path/to/lottie/file.json"
 
 # (str) Adaptive icon of the application (used if Android API level is 26+ at runtime)
-#icon.adaptive_foreground.filename = %(source.dir)s/data/icon_fg.png
-#icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
+icon.adaptive_foreground.filename = %(source.dir)s/data/images/icon_fg.png
+icon.adaptive_background.filename = %(source.dir)s/data/images/icon_bg.png
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions.html for all the supported syntaxes and properties)
@@ -249,7 +249,7 @@ android.enable_androidx = True
 
 # (str) screenOrientation to set for the main activity.
 # Valid values can be found at https://developer.android.com/guide/topics/manifest/activity-element
-#android.manifest.orientation = fullSensor
+android.manifest.orientation = fullSensor
 
 # (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
@@ -324,13 +324,13 @@ android.display_cutout = shortEdges
 #
 
 # (str) python-for-android URL to use for checkout
-p4a.url = https://github.com/daslearning-org/p4a-unofficial.git
+#p4a.url = https://github.com/daslearning-org/p4a-unofficial.git
 
 # (str) python-for-android fork to use in case if p4a.url is not specified, defaults to upstream (kivy)
 #p4a.fork = kivy
 
 # (str) python-for-android branch to use, defaults to master
-p4a.branch = numpy2
+p4a.branch = issue_fix
 
 # (str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch
 #p4a.commit = HEAD
@@ -359,7 +359,7 @@ p4a.branch = numpy2
 #p4a.setup_py = false
 
 # (str) extra command line arguments to pass when invoking pythonforandroid.toolchain
-#p4a.extra_args =
+#p4a.extra_args = --no-build-isolation
 
 
 
