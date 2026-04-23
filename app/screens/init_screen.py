@@ -25,45 +25,10 @@ Builder.load_string('''
     spacing: dp(20)
     padding: 8, 0, 8, self.bottom_pad # left, top, right, bottom
 
-    MDGridLayout: # Stearing wheel position, (for making u-turn decision)
-        cols: 2
-        adaptive_height: True
-
-        MDLabel:
-            text: "Stearing Position"
-            halign: "left"
-            font_size: sp(14)
-            size_hint_x: 0.4
-        MDGridLayout:
-            cols: 2
-            size_hint_x: 0.6
-            #adaptive_height: True
-            MDBoxLayout:
-                orientation: 'horizontal'
-                Check:
-                    id: stear_check_right
-                    active: True
-                    pos_hint: {'center_y': .5}
-                    on_active: app.set_stearing_pos("right")
-                MDLabel:
-                    adaptive_width: True
-                    text: "Right"
-                    halign: "left"
-            MDBoxLayout:
-                orientation: 'horizontal'
-                Check:
-                    id: stear_check_left
-                    #active: True
-                    pos_hint: {'center_y': .5}
-                    on_active: app.set_stearing_pos("left")
-                MDLabel:
-                    adaptive_width: True
-                    text: "Left"
-                    halign: "left"
-
     MDGridLayout: # bluetooth connect
         cols: 2
         adaptive_height: True
+        padding: 0, 8, 0, 0
 
         MDLabel:
             id: bt_list_btn_lbl
@@ -82,6 +47,7 @@ Builder.load_string('''
     MDGridLayout:
         cols: 2
         adaptive_height: True
+        spacing: dp(8)
         MDLabel:
             text: "Enter Bluetooth MAC"
             halign: "left"
@@ -94,6 +60,35 @@ Builder.load_string('''
             mode: "rectangle"
             #helper_text_mode: "persistent"
             size_hint_x: 0.6
+            font_size: sp(18)
+            multiline: False
+        # Charge text box
+        MDLabel:
+            text: "Minimum Charge %"
+            halign: "left"
+            font_size: sp(14)
+            size_hint_x: 0.4
+        MDTextField:
+            id: min_charge
+            text: "30"
+            hint_text: "0 - 100"
+            mode: "rectangle"
+            #helper_text_mode: "persistent"
+            size_hint_x: 0.2
+            font_size: sp(18)
+            multiline: False
+        MDLabel:
+            text: "Maximum Charge %"
+            halign: "left"
+            font_size: sp(14)
+            size_hint_x: 0.4
+        MDTextField:
+            id: max_charge
+            text: "85"
+            hint_text: "0 - 100"
+            mode: "rectangle"
+            #helper_text_mode: "persistent"
+            size_hint_x: 0.2
             font_size: sp(18)
             multiline: False
 
@@ -120,7 +115,7 @@ Builder.load_string('''
             size_hint_x: 0.7
             font_size: sp(24)
             md_bg_color: 'green'
-            on_release: app.go_to_nav()
+            on_release: app.start_charge_mgr()
 
     Widget:
         size_hint_y: 1
