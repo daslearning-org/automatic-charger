@@ -85,7 +85,10 @@ def connect_bluetooth(mac_addr:str):
         bt_connecting = True
         blue_conn_stat = bluCon.connect_device(mac_addr)
         bt_connecting = True
-        if blue_conn_stat:
+        time.sleep(1)
+        bt_check = bluCon.check_bl_stat()
+        if bt_check:
+            blue_conn_stat = bt_check
             resp_template["bt"] = "connected"
             mac_set = mac_addr
         else:
@@ -191,7 +194,8 @@ def charge_svc_thread():
         if auto_mode:
             battery_pct, plugged_in = get_battery_details()
             resp_template["batt"] = f"Battery: {battery_pct}, plugged in: {'Yes' if plugged_in else 'No'}"
-            print(resp_template["batt"]) # debug
+            Thread(target=write_resp, daemon=True).run()
+            #print(resp_template["batt"]) # debug
             if battery_pct >= max_charge and plugged_in:
                 Thread(target=fire_few_off_commands, daemon=True).start()
             elif battery_pct <= min_charge and not plugged_in:
