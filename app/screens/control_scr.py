@@ -20,7 +20,7 @@ Builder.load_string('''
         cols: 2
         size_hint_y: 0.2
         spacing: dp(4)
-        padding: 14, 4, 14, 0 # left, top, right, bottom
+        padding: 14, 14, 14, 0 # left, top, right, bottom
 
         MDFillRoundFlatIconButton:
             id: start_listener_btn
@@ -31,7 +31,7 @@ Builder.load_string('''
             #pos_hint: {"center_x": .5, "center_y": .5}
             size_hint_x: 0.5
             #size_hint_y: 0.7
-            #on_release: app.toggle_auto_mode()
+            on_release: app.toggle_auto_mode()
 
     BoxLayout: # result display
         size_hint_y: 0.4
@@ -45,7 +45,7 @@ Builder.load_string('''
             halign: "center"
             valign: "top"
             markup: True
-            text: "Button updates will be shown here."
+            text: ""
             adaptive_height: True
 
         MDLabel:
@@ -53,7 +53,7 @@ Builder.load_string('''
             halign: "center"
             valign: "top"
             markup: True
-            text: "Your Navigation will be shown here."
+            text: "Battery details will be shown here (if auto mode is on)"
             adaptive_height: True
 
 ''')

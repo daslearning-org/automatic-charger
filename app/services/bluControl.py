@@ -21,6 +21,8 @@ class BluetoothCon():
                     stat = True
             except Exception as e:
                 print(f"Error while checking bluetooth on/off status: {e}")
+        else: # need to put a logic for linux & windows
+            stat = True
         return stat
 
     def request_enable_bl(self):
@@ -58,9 +60,9 @@ class BluetoothCon():
                     result.append((name, addr))
             except Exception as e:
                 print(f"Error in Bluetooth device listing: {e}")
-        elif self.platform == "linux":
+        else:
             from services.bleLinux import get_nearby_devices
-            result = get_nearby_devices()
+            result = asyncio.run(get_nearby_devices())
         return result
 
     def check_bt_type(self, mac:str):
@@ -85,7 +87,7 @@ class BluetoothCon():
                 # Should be classic
                 print(f"{mac} - BT type check not in category!")
                 self.ble_device = False
-        elif self.platform == "linux":
+        else:
             self.ble_device = True # Only BLE mode is supported on Desktop platforms
         return self.ble_device
 
@@ -120,10 +122,11 @@ class BluetoothCon():
                 print(f"Error while conencting to ESP32: {e}")
                 self.connect_ok = False
         # for Linux OS
-        elif self.platform == "linux":
+        else:
             from services.bleLinux import LinuxBle
             self.ble_client = LinuxBle()
-            self.connect_ok = asyncio.run(self.ble_client.connect(mac))
+            self.connect_ok = self.ble_client.connect(mac)
+            print(f"Connect ok: {self.connect_ok}")
 
         return self.connect_ok
 
@@ -148,8 +151,8 @@ class BluetoothCon():
                 print(f"Error while send msg to ESP: {e}")
                 self.connect_ok = False
         # for linux
-        elif self.platform == "linux" and self.connect_ok:
-            stat = asyncio.run(self.ble_client.send(cmd))
+        elif self.connect_ok:
+            stat = self.ble_client.send(cmd)
             if not stat:
                 self.connect_ok = False
 

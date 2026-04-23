@@ -1,5 +1,7 @@
 #import subprocess
 from bleak import BleakClient, BleakScanner
+import asyncio
+from threading import Thread
 
 async def get_nearby_devices():
     """
@@ -16,12 +18,7 @@ async def get_nearby_devices():
     try:
         devices = await BleakScanner.discover()
         for device in devices:
-            if len(device) >= 17 and device.count(":") >= 5:
-                mac = device[0:17]
-                first_space = device.find(" ")
-                name = device[first_space+1:]
-                bt_list.append((name, mac))
-
+            bt_list.append((device.name, device.address))
     except Exception as e:
        print(f"Error executing ble list: {e}")
     return bt_list
@@ -32,14 +29,26 @@ class LinuxBle:
         self.mac_addr = None
         self.client = None
         self.char_uuid = None
+        self.loop = asyncio.new_event_loop()
+        self.thread = Thread(target=self._run_loop, daemon=True)
+        self.thread.start()
 
-    async def connect(self, mac:str):
+    def _run_loop(self):
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_forever()
+
+    def run_task(self, coro):
+        return asyncio.run_coroutine_threadsafe(coro, self.loop)
+
+    def connect(self, mac:str):
+        if self.client and self.client.is_connected:
+            return True
+        return asyncio.run_coroutine_threadsafe(
+            self._connect(mac), self.loop
+        ).result()
+
+    async def _connect(self, mac:str):
         try:
-            device = await BleakScanner.find_device_by_address(mac, timeout=10.0)
-            if not device:
-                print(f"Your device {mac} is not found under Bluetooth range!")
-                return False
-
             self.client = BleakClient(mac, disconnected_callback=self.handle_disconnect)
             await self.client.connect()
             self.mac_addr = mac
@@ -48,19 +57,25 @@ class LinuxBle:
                 for char in service.characteristics:
                     if char.uuid.startswith("beb5483e"):
                         self.char_uuid = char.uuid
+                        print(f"BLE connected with UUID: {self.char_uuid}")
                         return True
         except Exception as e:
             print(f"BLE Linux connection error: {e}")
         # if loop cannot find the correct uuid
         return False
 
-    def handle_disconnect(self):
+    def handle_disconnect(self, instance=None):
         print("BLE disconnected")
         self.mac_addr = None
         self.client = None
         self.char_uuid = None
 
-    async def send(self, message:str):
+    def send(self, message:str):
+        return asyncio.run_coroutine_threadsafe(
+            self._send(message), self.loop
+        ).result()
+
+    async def _send(self, message:str):
         if self.client and self.char_uuid:
             try:
                 msg_byte = message.encode('utf-8')

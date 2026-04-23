@@ -71,12 +71,14 @@ Builder.load_string('''
         MDTextField:
             id: min_charge
             text: "30"
-            hint_text: "0 - 100"
+            hint_text: "0 - 99"
             mode: "rectangle"
             #helper_text_mode: "persistent"
             size_hint_x: 0.2
             font_size: sp(18)
             multiline: False
+            max_text_length: 2
+            input_filter: 'int'
         MDLabel:
             text: "Maximum Charge %"
             halign: "left"
@@ -85,12 +87,14 @@ Builder.load_string('''
         MDTextField:
             id: max_charge
             text: "85"
-            hint_text: "0 - 100"
+            hint_text: "0 - 90"
             mode: "rectangle"
             #helper_text_mode: "persistent"
             size_hint_x: 0.2
             font_size: sp(18)
             multiline: False
+            max_text_length: 2
+            input_filter: 'int'
 
     Widget:
         size_hint_y: 1
@@ -115,7 +119,7 @@ Builder.load_string('''
             size_hint_x: 0.7
             font_size: sp(24)
             md_bg_color: 'green'
-            on_release: app.start_charge_mgr()
+            on_release: app.goto_charge_mgr()
 
     Widget:
         size_hint_y: 1
