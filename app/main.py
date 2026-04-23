@@ -122,6 +122,21 @@ class AutoChargeApp(MDApp):
             scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
             battery_pct = (level / float(scale)) * 100
             print(f"Battery: {battery_pct:.2f}%")
+            # check if charging is happening
+            plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+            is_usb = plugged == BatteryManager.BATTERY_PLUGGED_USB
+            is_ac = plugged == BatteryManager.BATTERY_PLUGGED_AC
+            is_wireless = plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
+            power_plugged = is_usb or is_ac or is_wireless
+            print("Plugged:", power_plugged)
+            print("USB:", is_usb, "AC:", is_ac, "Wireless:", is_wireless)
+            #another method
+            status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+            is_charging = (
+                status == BatteryManager.BATTERY_STATUS_CHARGING or
+                status == BatteryManager.BATTERY_STATUS_FULL
+            )
+            print("Plugged (alternative): ", is_charging)
         else:
             # Get battery details
             battery = psutil.sensors_battery()
@@ -133,13 +148,13 @@ class AutoChargeApp(MDApp):
                 print(f"Power Plugged: {'Yes' if power_plugged else 'No'}")
             else:
                 print("Battery information could not be retrieved.")
-        return battery_pct
+        return battery_pct, power_plugged
 
     def battery_loop(self):
         import time
         while True:
-            battery_pct = self.get_battery_details()
-            self.result_txt.text = f"Battery: {battery_pct}"
+            battery_pct, pugged_in = self.get_battery_details()
+            self.result_txt.text = f"Battery: {battery_pct}, plugged in: {'Yes' if pugged_in else 'No'}"
             time.sleep(2)
 
     def show_toast_msg(self, message, is_error=False, duration=3):

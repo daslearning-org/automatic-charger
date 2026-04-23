@@ -1,4 +1,5 @@
 #from kivy.clock import Clock
+import asyncio
 
 class BluetoothCon():
 
@@ -58,10 +59,10 @@ class BluetoothCon():
             except Exception as e:
                 print(f"Error in Bluetooth device listing: {e}")
         elif self.platform == "linux":
-            from services.bleLinux import get_paired_devices
-            result = get_paired_devices()
+            from services.bleLinux import get_nearby_devices
+            result = get_nearby_devices()
         return result
-    
+
     def check_bt_type(self, mac:str):
         """Checks whether the given mac is a BLE device or a classic BT"""
         if self.platform == "android":
@@ -118,6 +119,12 @@ class BluetoothCon():
             except Exception as e:
                 print(f"Error while conencting to ESP32: {e}")
                 self.connect_ok = False
+        # for Linux OS
+        elif self.platform == "linux":
+            from services.bleLinux import LinuxBle
+            self.ble_client = LinuxBle()
+            self.connect_ok = asyncio.run(self.ble_client.connect(mac))
+
         return self.connect_ok
 
     def check_bl_stat(self):
@@ -140,4 +147,10 @@ class BluetoothCon():
             except Exception as e:
                 print(f"Error while send msg to ESP: {e}")
                 self.connect_ok = False
+        # for linux
+        elif self.platform == "linux" and self.connect_ok:
+            stat = asyncio.run(self.ble_client.send(cmd))
+            if not stat:
+                self.connect_ok = False
+
         return stat
