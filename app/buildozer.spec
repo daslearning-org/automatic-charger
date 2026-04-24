@@ -13,16 +13,16 @@ package.domain = in.daslearning
 source.dir = .
 
 # (list) Source files to include (leave empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,json,java,ttf
+source.include_exts = py,png,jpg,kv,atlas,java,ttf
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
 
 # (list) Source files to exclude (leave empty to not exclude anything)
-#source.exclude_exts = spec
+source.exclude_exts = spec, md
 
 # (list) List of directory to exclude (leave empty to not exclude anything)
-source.exclude_dirs = tests, logs, bin, build, dist, patches, .venv, venv, env, .env, p4a_local_recipes, hookers
+source.exclude_dirs = tests, logs, bin, build, dist, patches, .venv, venv, env, .env, p4a_local_recipes, hookers, config
 
 # (list) List of exclusions using pattern matching
 # Do not prefix with './'
@@ -60,7 +60,7 @@ orientation = all
 # launched. This is optionally followed by ":foreground" for foreground services or
 # ":foreground:sticky" for sticky foreground services. The default is a background service.
 # Bound services are not supported.
-#services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
+services = autochrgsvc:services/chrgService.py:foreground:foregroundServiceType=dataSync
 
 #
 # OSX Specific
@@ -98,7 +98,7 @@ icon.adaptive_background.filename = %(source.dir)s/data/images/icon_bg.png
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions.html for all the supported syntaxes and properties)
-#android.permissions = android.permission.INTERNET, (name=android.permission.WRITE_EXTERNAL_STORAGE;maxSdkVersion=18)
+android.permissions = android.permission.BLUETOOTH, android.permission.BLUETOOTH_ADMIN, android.permission.BLUETOOTH_CONNECT, android.permission.WAKE_LOCK, android.permission.FOREGROUND_SERVICE, android.permission.POST_NOTIFICATIONS, android.permission.FOREGROUND_SERVICE_DATA_SYNC
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
@@ -180,7 +180,7 @@ android.accept_sdk_license = True
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-#android.add_src =
+android.add_src = ./javaSrc
 
 # (list) Android AAR archives to add
 #android.add_aars =
@@ -324,13 +324,13 @@ android.display_cutout = shortEdges
 #
 
 # (str) python-for-android URL to use for checkout
-#p4a.url = https://github.com/daslearning-org/p4a-unofficial.git
+p4a.url = https://github.com/daslearning-org/p4a-unofficial.git
 
 # (str) python-for-android fork to use in case if p4a.url is not specified, defaults to upstream (kivy)
 #p4a.fork = kivy
 
 # (str) python-for-android branch to use, defaults to master
-p4a.branch = issue_fix
+p4a.branch = dev_fix
 
 # (str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch
 #p4a.commit = HEAD
