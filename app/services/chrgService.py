@@ -46,6 +46,7 @@ blue_conn_stat = False
 bt_connecting = False
 auto_mode = False
 mac_set = None
+last_cmd = "none"
 min_charge = 30
 max_charge = 85
 config_data = {}
@@ -82,6 +83,7 @@ def connect_bluetooth(mac_addr:str):
     global bt_connecting
     bt_check = False
     if len(mac_addr) == 17:
+        mac_set = mac_addr
         bt_connecting = True
         blue_conn_stat = bluCon.connect_device(mac_addr)
         for i in range(7):
@@ -90,7 +92,6 @@ def connect_bluetooth(mac_addr:str):
             if bt_check:
                 blue_conn_stat = bt_check
                 resp_template["bt"] = "connected"
-                mac_set = mac_addr
                 break
         if not bt_check:
             resp_template["bt"] = "failed"
@@ -165,6 +166,7 @@ def charge_svc_thread():
     global blue_conn_stat
     global min_charge
     global max_charge
+    global last_cmd
 
     write_resp()
 
@@ -203,6 +205,15 @@ def charge_svc_thread():
             elif battery_pct <= min_charge and not plugged_in:
                 fire_few_on_commands()
             write_resp()
+
+        # manucal command
+        command = config_data.get("cmd", "none")
+        if command == "on" and command != last_cmd:
+            last_cmd= command
+            fire_few_on_commands()
+        if command == "off" and command != last_cmd:
+            last_cmd= command
+            fire_few_off_commands()
 
         # put a sleep
         time.sleep(2)

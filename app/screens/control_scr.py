@@ -33,6 +33,17 @@ Builder.load_string('''
             #size_hint_y: 0.7
             on_release: app.toggle_auto_mode()
 
+        MDFillRoundFlatIconButton:
+            id: manual_btn
+            text: "Manual On/Off"
+            icon: "power-plug-off"
+            font_size: sp(18)
+            md_bg_color: 'gray'
+            #pos_hint: {"center_x": .5, "center_y": .5}
+            size_hint_x: 0.5
+            #size_hint_y: 0.7
+            on_release: app.manual_control()
+
     BoxLayout: # result display
         size_hint_y: 0.4
         id: result_box

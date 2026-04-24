@@ -80,6 +80,7 @@ class AutoChargeApp(MDApp):
         super().__init__(**kwargs)
         self.txt_dialog = None
         self.wake_lock = None
+        self.manual_cmd = False
         self.config_template = {
             "mac": "",
             "min_charge": 30,
@@ -325,6 +326,20 @@ class AutoChargeApp(MDApp):
             toggle_btn.text = "Stop Auto Mode"
             toggle_btn.icon = "stop"
             toggle_btn.md_bg_color = "orange"
+
+    def manual_control(self):
+        manual_btn = self.root.ids.app_box.ids.manual_btn
+        if self.manual_cmd:
+            self.config_template["cmd"] = "off"
+            manual_btn.icon = "power-plug-off"
+            manual_btn.md_bg_color = "gray"
+            self.manual_cmd = False
+        else:
+            self.config_template["cmd"] = "on"
+            manual_btn.icon = "power-plug"
+            manual_btn.md_bg_color = "green"
+            self.manual_cmd = True
+        self.write_config()
 
     def get_battery_details(self):
         battery_pct = 0
