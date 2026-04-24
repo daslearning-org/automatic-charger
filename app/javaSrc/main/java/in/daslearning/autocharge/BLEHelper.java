@@ -12,8 +12,6 @@ public class BLEHelper {
     //private BLEListener listener;
     private BluetoothGatt gatt;
     private BluetoothGattCharacteristic writeChar;
-    private boolean con_stat = false;
-    private boolean uuid_stat = false;
 
     public BLEHelper() {
     }
@@ -38,7 +36,6 @@ public class BLEHelper {
                 public void onConnectionStateChange(BluetoothGatt g, int status, int newState) {
                     if (newState == BluetoothProfile.STATE_CONNECTED) {
                         Log.d("BLE-AC", "BLE Connected" + status);
-                        con_stat = true;
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
                             g.discoverServices();
                         }, 500);
@@ -57,7 +54,6 @@ public class BLEHelper {
                             String charUUID = ch.getUuid().toString();
                             if (charUUID.contains("beb5483e")) {
                                 writeChar = ch;
-                                uuid_stat = true;
                                 Log.d("BLE-AC", "Selected UUID: " + charUUID);
                                 if((props & BluetoothGattCharacteristic.PROPERTY_WRITE) != 0){
                                     Log.d("BLE-AC", "It is PROPERTY_WRITE");
@@ -90,7 +86,7 @@ public class BLEHelper {
     }
 
     public boolean checkConnectStat(){
-        if(con_stat && uuid_stat){
+        if (gatt == null || writeChar == null){
             Log.d("BLE-AC", "Connection is ok & UUID is set");
             return true;
         }

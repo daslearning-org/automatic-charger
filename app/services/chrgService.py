@@ -80,17 +80,19 @@ def connect_bluetooth(mac_addr:str):
     global resp_template
     global mac_set
     global bt_connecting
+    bt_check = False
     if len(mac_addr) == 17:
         bt_connecting = True
         blue_conn_stat = bluCon.connect_device(mac_addr)
-        bt_connecting = True
-        time.sleep(1)
-        bt_check = bluCon.check_bl_stat()
-        if bt_check:
-            blue_conn_stat = bt_check
-            resp_template["bt"] = "connected"
-            mac_set = mac_addr
-        else:
+        for i in range(7):
+            time.sleep(0.5)
+            bt_check = bluCon.check_bl_stat()
+            if bt_check:
+                blue_conn_stat = bt_check
+                resp_template["bt"] = "connected"
+                mac_set = mac_addr
+                break
+        if not bt_check:
             resp_template["bt"] = "failed"
         write_resp()
     bt_connecting = False

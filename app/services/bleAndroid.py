@@ -15,10 +15,13 @@ class BLEClient:
         service = PythonService.mService
         context = service.getApplicationContext()
         self.helper.connect(context, mac)
-        time.sleep(0.5)
-        stat = self.helper.checkConnectStat()
-        if stat:
-            self.mac_addr = mac
+        for i in range(5):
+            time.sleep(0.5)
+            stat = self.helper.checkConnectStat()
+            if stat:
+                self.mac_addr = mac
+                print("BLE Android connection is verified.")
+                break
         return True # not to retry multiple
 
     def send(self, msg):

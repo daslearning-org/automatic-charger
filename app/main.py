@@ -221,21 +221,23 @@ class AutoChargeApp(MDApp):
 
     def bt_connect_checker(self):
         import time
-        time.sleep(2)
-        resp = None
-        if os.path.exists(self.resp_path):
-            with open(self.resp_path, "r") as rf:
-                resp = json.load(rf)
-            if resp:
-                resp_bt = resp.get("bt", "")
-                if resp_bt == "connected":
-                    Clock.schedule_once(lambda dt: self.show_toast_msg("Bluetooth is connected"))
-                    self.blu_ok = True
-                elif resp_bt == "failed":
-                    Clock.schedule_once(lambda dt: self.show_toast_msg("Bluetooth connection failed!", is_error=True))
-                elif resp_bt == "none":
-                    Clock.schedule_once(lambda dt: self.show_toast_msg("Connection is not yet complete...", is_error=True, duration=2))
-                    #self.bt_connect_checker()
+        for i in range(8):
+            time.sleep(0.5)
+            resp = None
+            if os.path.exists(self.resp_path):
+                with open(self.resp_path, "r") as rf:
+                    resp = json.load(rf)
+                if resp:
+                    resp_bt = resp.get("bt", "")
+                    if resp_bt == "connected":
+                        Clock.schedule_once(lambda dt: self.show_toast_msg("Bluetooth is connected"))
+                        self.blu_ok = True
+                        break
+                    elif resp_bt == "failed":
+                        Clock.schedule_once(lambda dt: self.show_toast_msg("Bluetooth connection failed!", is_error=True))
+                        break
+                    elif resp_bt == "none":
+                        Clock.schedule_once(lambda dt: self.show_toast_msg("Connection is not yet complete...", is_error=True, duration=2))
 
     def list_bl_devices(self, button):
         is_bl_on = self.bluCon.bl_on()

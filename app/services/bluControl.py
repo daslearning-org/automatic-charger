@@ -143,8 +143,8 @@ class BluetoothCon():
                     if self.ble_client:
                         stat = self.ble_client.send(cmd)
                         print(f"BLE message stat: {'Ok' if stat else 'Not OK'}")
-                        #if not stat:
-                        #    self.connect_ok = False
+                        if not stat:
+                            self.connect_ok = False
                     else:
                         self.connect_ok = False
                 else: # classic device
