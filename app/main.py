@@ -97,6 +97,28 @@ class AutoChargeApp(MDApp):
     def on_start(self):
         # OS specific setups
         if platform == "android":
+            # permissions
+            from android.permissions import check_permission, request_permissions, Permission
+            self.sdk_version = 28
+            try:
+                VERSION = autoclass('android.os.Build$VERSION')
+                self.sdk_version = VERSION.SDK_INT
+                print(f"Android SDK: {self.sdk_version}")
+            except Exception as e:
+                print(f"Could not check the android SDK version: {e}")
+            permissions = [
+                            Permission.BLUETOOTH, 
+                            Permission.BLUETOOTH_ADMIN, 
+                            Permission.BLUETOOTH_CONNECT, 
+                            Permission.WAKE_LOCK, 
+                            Permission.FOREGROUND_SERVICE,
+                            Permission.POST_NOTIFICATIONS,
+                            Permission.FOREGROUND_SERVICE_DATA_SYNC,
+                        ]
+            try:
+                request_permissions(permissions)
+            except Exception as e:
+                print(f"Error during permission grant: {e}")
             # paths on android
             context = autoclass('org.kivy.android.PythonActivity').mActivity
             android_path = context.getExternalFilesDir(None).getAbsolutePath()
@@ -107,6 +129,11 @@ class AutoChargeApp(MDApp):
                 self.external_storage = Environment.getExternalStorageDirectory().getAbsolutePath()
             except Exception:
                 self.external_storage = os.path.abspath("/storage/emulated/0/")
+            # start the listner service on Android
+            try:
+                self.start_service()
+            except Exception as e:
+                print(f"Error while starting android service: {e}")
 
         # for other platforms (non android)
         else:
@@ -115,6 +142,8 @@ class AutoChargeApp(MDApp):
             self.config_dir = os.path.join(base_path, 'services', 'config')
             # start the bluetooth service
             Thread(target=charge_svc_thread, daemon=True).start()
+
+        # all other setups
         os.makedirs(self.config_dir, exist_ok=True)
         self.config_path = os.path.join(self.config_dir, 'config.json')
         self.resp_path = os.path.join(self.config_dir, 'resp.json')
@@ -145,6 +174,22 @@ class AutoChargeApp(MDApp):
         # Threaded steps
         #Thread(target=self.battery_loop, daemon=True).start()
         Thread(target=self.dir_resp_checker, daemon=True).start()
+
+    def start_service(self):
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        mActivity = PythonActivity.mActivity
+        service = autoclass('in.daslearning.autocharge.ServiceAutochrgsvc')
+        #argument = ''
+        argument = os.environ.get('PYTHON_SERVICE_ARGUMENT', '')
+        print(f"PYTHON_SERVICE_ARGUMENT: {argument}")
+        #service.start(mActivity, argument)
+        service.start(mActivity, 'icon', 'Auto Charger', 'Service Running' , argument)
+
+    def stop_service(self):
+        service = autoclass('in.daslearning.autocharge.ServiceAutochrgsvc')
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        mActivity = PythonActivity.mActivity
+        service.stop(mActivity)
 
     def dir_resp_checker(self):
         import time
@@ -241,7 +286,6 @@ class AutoChargeApp(MDApp):
                 self.show_toast_msg(f"Error setting max/min charge value, default will be used.", is_error=True)
             self.root.ids.screen_manager.current = "mainAppScr"
             self.txt_dialog_closer(instance)
-            
         else:
             buttons = [
                 MDFlatButton(
@@ -389,6 +433,8 @@ class AutoChargeApp(MDApp):
     ## run on app exit
     def on_stop(self):
         print("Exiting the app...")
+        if platform == "android":
+            self.stop_service()
 
 if __name__ == '__main__':
     AutoChargeApp().run()

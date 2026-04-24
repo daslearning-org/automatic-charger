@@ -203,3 +203,7 @@ def charge_svc_thread():
 
         # put a sleep
         time.sleep(2)
+
+if __name__ == "__main__":
+    # start the main thread
+    charge_svc_thread()
