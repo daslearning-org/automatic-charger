@@ -1,12 +1,9 @@
 # from kivy/kivymd world
 from kivy.utils import platform
 
-import logging
-logging.getLogger("bleak").setLevel(logging.ERROR)
-
 # python's modules
 from os.path import join, abspath, exists, dirname
-from threading import Thread
+#from threading import Thread
 import time
 import sys
 import json
@@ -27,6 +24,8 @@ if platform == "android":
         print(f"Error while accessing app internal path: {e}")
 else:
     import psutil
+    import logging
+    logging.getLogger("bleak").setLevel(logging.ERROR)
     # Determine the base path for your application's resources
     if getattr(sys, 'frozen', False):
         # Running as a PyInstaller bundle
@@ -93,6 +92,7 @@ def connect_bluetooth(mac_addr:str):
             mac_set = mac_addr
         else:
             resp_template["bt"] = "failed"
+        write_resp()
     bt_connecting = False
 
 def get_battery_details():
@@ -100,10 +100,11 @@ def get_battery_details():
     # OS specific setups
     if platform == "android":
         # get battery details
-        activity = autoclass('org.kivy.android.PythonActivity').mActivity
+        PythonService = autoclass('org.kivy.android.PythonService')
         IntentFilter = autoclass('android.content.IntentFilter')
         BatteryManager = autoclass('android.os.BatteryManager')
-        intent = activity.registerReceiver(
+        context = PythonService.mService 
+        intent = context.registerReceiver(
             None,
             IntentFilter('android.intent.action.BATTERY_CHANGED')
         )
@@ -194,12 +195,12 @@ def charge_svc_thread():
         if auto_mode:
             battery_pct, plugged_in = get_battery_details()
             resp_template["batt"] = f"Battery: {battery_pct}, plugged in: {'Yes' if plugged_in else 'No'}"
-            Thread(target=write_resp, daemon=True).run()
-            #print(resp_template["batt"]) # debug
+            print(resp_template["batt"]) # debug
             if battery_pct >= max_charge and plugged_in:
-                Thread(target=fire_few_off_commands, daemon=True).start()
+                fire_few_off_commands()
             elif battery_pct <= min_charge and not plugged_in:
-                Thread(target=fire_few_on_commands, daemon=True).start()
+                fire_few_on_commands()
+            write_resp()
 
         # put a sleep
         time.sleep(2)

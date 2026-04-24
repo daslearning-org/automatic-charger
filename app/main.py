@@ -78,6 +78,7 @@ class AutoChargeApp(MDApp):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.txt_dialog = None
         self.wake_lock = None
         self.config_template = {
             "mac": "",
@@ -113,7 +114,6 @@ class AutoChargeApp(MDApp):
                             Permission.WAKE_LOCK, 
                             Permission.FOREGROUND_SERVICE,
                             Permission.POST_NOTIFICATIONS,
-                            Permission.FOREGROUND_SERVICE_DATA_SYNC,
                         ]
             try:
                 request_permissions(permissions)

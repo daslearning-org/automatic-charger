@@ -12,6 +12,8 @@ public class BLEHelper {
     //private BLEListener listener;
     private BluetoothGatt gatt;
     private BluetoothGattCharacteristic writeChar;
+    private boolean con_stat = false;
+    private boolean uuid_stat = false;
 
     public BLEHelper() {
     }
@@ -35,7 +37,8 @@ public class BLEHelper {
                 @Override
                 public void onConnectionStateChange(BluetoothGatt g, int status, int newState) {
                     if (newState == BluetoothProfile.STATE_CONNECTED) {
-                        Log.d("AUTOCHRG", "BLE Connected" + status);
+                        Log.d("BLE-AC", "BLE Connected" + status);
+                        con_stat = true;
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
                             g.discoverServices();
                         }, 500);
@@ -54,12 +57,13 @@ public class BLEHelper {
                             String charUUID = ch.getUuid().toString();
                             if (charUUID.contains("beb5483e")) {
                                 writeChar = ch;
-                                Log.d("BLE", "Selected UUID: " + charUUID);
+                                uuid_stat = true;
+                                Log.d("BLE-AC", "Selected UUID: " + charUUID);
                                 if((props & BluetoothGattCharacteristic.PROPERTY_WRITE) != 0){
-                                    Log.d("BLE", "It is PROPERTY_WRITE");
+                                    Log.d("BLE-AC", "It is PROPERTY_WRITE");
                                 }
                                 if((props & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0){
-                                    Log.d("BLE", "It is PROPERTY_WRITE_NO_RESPONSE");
+                                    Log.d("BLE-AC", "It is PROPERTY_WRITE_NO_RESPONSE");
                                 }
                                 return;
                             }
@@ -69,18 +73,32 @@ public class BLEHelper {
             },
             BluetoothDevice.TRANSPORT_LE);
         }, 500); // with a delay
+
     }
 
-    public void send(String msg) {
+    public boolean send(String msg) {
         if (gatt == null || writeChar == null){
-            Log.d("AUTOCHRG", "BLE gatt or write prop is null!");
+            Log.d("BLE-AC", "BLE gatt or write prop is null!");
+            return false;
         }
         else{
             writeChar.setValue(msg.getBytes());
             gatt.writeCharacteristic(writeChar);
-            //Log.d("AUTOCHRG", "sent to ble: " + msg);
+            Log.d("BLE-AC", "sent to ble: " + msg);
+            return true;
         }
     }
+
+    public boolean checkConnectStat(){
+        if(con_stat && uuid_stat){
+            Log.d("BLE-AC", "Connection is ok & UUID is set");
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
 }
 
 // end

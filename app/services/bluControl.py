@@ -99,9 +99,10 @@ class BluetoothCon():
                 if ble_device: # BLE device
                     from services.bleAndroid import BLEClient
                     self.ble_client = BLEClient()
-                    self.ble_client.connect(mac)
-                    self.mac_addr = mac
-                    self.connect_ok = True
+                    self.connect_ok = self.ble_client.connect(mac)
+                    if self.connect_ok:
+                        self.mac_addr = mac
+                    #self.connect_ok = True
                 else: # classic BT
                     from jnius import autoclass
                     BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
@@ -140,8 +141,10 @@ class BluetoothCon():
             try:
                 if self.ble_device: # BLE device
                     if self.ble_client:
-                        self.ble_client.send(cmd)
-                        stat = True
+                        stat = self.ble_client.send(cmd)
+                        print(f"BLE message stat: {'Ok' if stat else 'Not OK'}")
+                        #if not stat:
+                        #    self.connect_ok = False
                     else:
                         self.connect_ok = False
                 else: # classic device
