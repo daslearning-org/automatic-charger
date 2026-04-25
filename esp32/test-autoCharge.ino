@@ -1,3 +1,4 @@
+#include <FastLED.h>
 #include <ArduinoJson.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -6,11 +7,12 @@
 
 #include "LittleFS.h"
 
+#define NUM_LEDS 1
+#define DATA_PIN 48 // on esp32-s3 super mini
 #define SERVICE_UUID        "4fafc201-2fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e3-4688-b7f5-ea07361b26a8"
 
 //** Global variables */
-const int chargePin = D10; // on XIAO ESP32-C3
 
 // configs
 const char* CONFIG_FILE = "/config.json";
@@ -24,23 +26,29 @@ struct Config {
 Config appConfig;
 
 // Flags
+bool ledState = false;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 BLEServer* pServer = nullptr;
 
 // LED controls
+CRGB leds[NUM_LEDS];
 bool modeSelected = false;
 String bleValue = "none";
+
+// timer
+unsigned long previousMillis = 0;
+int interval = 800; // Can be changed programatically
 
 //** Function definitions */
 
 // Initialize the LittleFS
 void initFS(){
   if (!LittleFS.begin()) {
-    Serial.println("An error has occurred while mounting LittleFS!");
+  Serial.println("An error has occurred while mounting LittleFS!");
   }
   else{
-    Serial.println("LittleFS mounted successfully");
+  Serial.println("LittleFS mounted successfully");
   }
 }
 
@@ -129,17 +137,20 @@ class MyServerCallbacks: public BLEServerCallbacks {
   }
 };
 
+void stopLED(){ // turn of the display
+  FastLED.clear();
+  FastLED.show();
+}
+
 void setup(){
   // Setup the ESP32 board after boot
   Serial.begin(115200);
   Serial.println("Serial started");
-
-  // initialize digital pin led as an output
-  pinMode(chargePin, OUTPUT);
-
+  FastLED.addLeds<WS2812,DATA_PIN,GRB>(leds,NUM_LEDS);
+  FastLED.clear();
+  FastLED.setBrightness(10); // : default
   initFS();
-
-  BLEDevice::init("XiaoC3Ble");
+  BLEDevice::init("EspMiniBle");
   pServer = BLEDevice::createServer(); // now global
   pServer->setCallbacks(new MyServerCallbacks());
 
@@ -157,7 +168,6 @@ void setup(){
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->start();
   Serial.println("BLE Ready, now you can pair it with bluetooth! \n");
-
   if(readConfigFile()){
     Serial.println("App config: " + appConfig.mode); // to be used when config is needed
   }
@@ -166,11 +176,13 @@ void setup(){
 void loop(){
   // The main loop
 
-  if(modeSelected){
-    digitalWrite(chargePin, HIGH);
+  // This will get replaced by simple on off via GPIO PIN.
+  if (modeSelected && ledState){
+    leds[0] = CRGB::Green;
+    FastLED.show();
   }
   else{
-    digitalWrite(chargePin, LOW);
+    stopLED();
   }
 
   if (bleValue != "none") { // input from BLE
@@ -178,12 +190,20 @@ void loop(){
     bleValue.toLowerCase();
     Serial.println("Entered text: " + bleValue); // Debug
     if (bleValue == "on"){
+      stopLED();
       modeSelected = true;
     }
     else if(bleValue == "off"){
+      stopLED();
       modeSelected = false;
     }
-    bleValue = "none";
+  }
+
+  // Timer loop (not needed for actual use case)
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    ledState = !ledState;
   }
 
   // Handle disconnect
@@ -199,5 +219,4 @@ void loop(){
   if (deviceConnected && !oldDeviceConnected) {
     oldDeviceConnected = deviceConnected;
   }
-
 }
