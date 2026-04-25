@@ -4,107 +4,23 @@
 #include <BLEServer.h>
 //#include <esp_system.h>
 
-#include "LittleFS.h"
-
+// UUIDs for BLE
 #define SERVICE_UUID        "4fafc201-2fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e3-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID "beb5483e-36e3-4688-b7f5-ea07361b26a8" // this is the write UUID
 
 //** Global variables */
-const int chargePin = D10; // on XIAO ESP32-C3
-
-// configs
-const char* CONFIG_FILE = "/config.json";
-
-struct Config {
-  String ssid;
-  String wifipass;
-  String stearing;
-  String mode;
-};
-Config appConfig;
+const int chargePin = D10; // on XIAO ESP32-C3, you can use any other GPIO as per your model
 
 // Flags
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 BLEServer* pServer = nullptr;
 
-// LED controls
+// Charger controls
 bool modeSelected = false;
 String bleValue = "none";
 
 //** Function definitions */
-
-// Initialize the LittleFS
-void initFS(){
-  if (!LittleFS.begin()) {
-    Serial.println("An error has occurred while mounting LittleFS!");
-  }
-  else{
-    Serial.println("LittleFS mounted successfully");
-  }
-}
-
-// Function to read the configuration from LittleFS
-bool readConfigFile() {
-  File configFile = LittleFS.open(CONFIG_FILE, "r");
-  if (!configFile) {
-    Serial.println("Failed to open config file for reading. File might not exist.");
-    return false;
-  }
-
-  size_t size = configFile.size();
-  if (size == 0) {
-    Serial.println("Config file is empty.");
-    configFile.close();
-    return false;
-  }
-
-  StaticJsonDocument<256> doc; // Adjust size based on your JSON's complexity
-
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(doc, configFile);
-  configFile.close(); // Close the file after reading
-
-  if (error) {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.f_str());
-    return false;
-  }
-
-  // Extract values from the JSON document
-  appConfig.ssid = doc["ssid"] | "";
-  appConfig.wifipass = doc["wifipass"] | "";
-  appConfig.stearing = doc["stearing"] | "right";
-  appConfig.mode = doc["mode"] | "";
-
-  return true;
-}
-
-// Function to save the configuration to LittleFS
-bool saveConfigFile() {
-  File configFile = LittleFS.open(CONFIG_FILE, "w"); // Open in write mode, will create if not exists or overwrite
-  if (!configFile) {
-    Serial.println("Failed to open config file for writing.");
-    return false;
-  }
-
-  StaticJsonDocument<256> doc; // Adjust size based on your JSON's complexity
-
-  // Populate the JSON document from the config struct
-  doc["ssid"] = appConfig.ssid;
-  doc["wifipass"] = appConfig.wifipass;
-  doc["stearing"] = appConfig.stearing;
-  doc["mode"] = appConfig.mode;
-
-  // Serialize JSON to file
-  if (serializeJson(doc, configFile) == 0) {
-    Serial.println(F("Failed to write to file"));
-    configFile.close();
-    return false;
-  }
-  configFile.close();
-  return true;
-}
 
 // bluetooth
 class MyCallbacks: public BLECharacteristicCallbacks {
@@ -137,9 +53,7 @@ void setup(){
   // initialize digital pin led as an output
   pinMode(chargePin, OUTPUT);
 
-  initFS();
-
-  BLEDevice::init("XiaoC3Ble");
+  BLEDevice::init("AutoChrgBle");
   pServer = BLEDevice::createServer(); // now global
   pServer->setCallbacks(new MyServerCallbacks());
 
@@ -158,9 +72,6 @@ void setup(){
   pAdvertising->start();
   Serial.println("BLE Ready, now you can pair it with bluetooth! \n");
 
-  if(readConfigFile()){
-    Serial.println("App config: " + appConfig.mode); // to be used when config is needed
-  }
 }
 
 void loop(){
