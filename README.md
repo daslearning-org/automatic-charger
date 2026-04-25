@@ -1,6 +1,10 @@
 # 🔋 Automatic Charger for Mobile & Computer 🔌
 Turn on / off your laptop or mobile charger using the threshold values. The smart charger will be equipped with an ESP32 microcontroller. This application should work on Android, Linux &amp; Windows.
 
+## 💰 Sponsor Me
+You can buy me a coffee via [this link](https://www.paypal.com/paypalme/soomnathsdas) or tap on below image. Thank you 🙏. <br>
+<a href="https://www.paypal.com/paypalme/soomnathsdas"><img src="./docs/images/donate.svg" height="40"></a>
+
 ## 📽️ Demo
 Demo is coming soon...
 
