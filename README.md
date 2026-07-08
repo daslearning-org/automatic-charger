@@ -27,7 +27,7 @@ If you want to learn about setting up your ESP32 environment in `Arduino IDE`, y
 #### 🖧 ESP32 Setup
 Diagram will be added soon. Only one GPIO pin will be enough.
 
-1. Upload this [sketch](./esp32/autoCharge.ino) on your ESP32 from `Arduino IDE`. You should check & use GPIO pin depending on chosen model.
+1. Upload the equivalent sketch from the [sketch-folder](./esp32/) to your ESP32 from `Arduino IDE`. You should check & use GPIO pin depending on chosen model.
 
 ### 📱 Automatic Charger on Android
 
