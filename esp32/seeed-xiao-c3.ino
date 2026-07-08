@@ -6,7 +6,7 @@
 
 // UUIDs for BLE
 #define SERVICE_UUID        "4fafc201-2fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e3-4688-b7f5-ea07361b26a8" // this is the write UUID
+#define CHARACTERISTIC_UUID "beb5483e-36e3-1688-b7f5-ea07361b26a8" // this is the write UUID
 
 //** Global variables */
 const int chargePin = D10; // on XIAO ESP32-C3, you can use any other GPIO as per your model
